@@ -1,12 +1,13 @@
 #! /usr/bin/python
 
+import os
 import types
 import sys
 import inspect
 import subprocess
 
 
-services = {}
+registered_services = {}
 
 
 def main():
@@ -18,10 +19,10 @@ def main():
 
     name = sys.argv[1]
     if name == 'list':
-        print '\n'.join(services.keys())
+        print '\n'.join(registered_services.keys())
         return
 
-    service = services.get(name)
+    service = registered_services.get(name)
     if service is None:
         abort("%s: unrecognized service" % name)
 
@@ -38,11 +39,25 @@ def main():
 
 
 def register_services():
-    for name, obj in globals().iteritems():
-        if isinstance(obj, (type, types.ClassType)) and \
-           issubclass(obj, Service) and obj is not Service:
-            service = obj()
-            services[service.name] = service
+    for filename in os.listdir('services'):
+        if filename[0] != '_' and filename[-3:] == '.py':
+            module_name = filename[:-3]
+            services = __import__('services.%s' % module_name)
+            module = getattr(services, module_name)
+
+            for member in inspect.getmembers(module, inspect.isclass):
+                if member[0] != 'Service':
+                    service = member[1]()
+                    if validate_service(service):
+                        registered_services[service.name] = service
+
+
+def validate_service(service):
+    if not hasattr(service, 'name') or service.name is None:
+        print "Warning: Service %s does not have attribute 'name'." \
+              % service.__class__
+        return False
+    return True
 
 
 def usage_service(service):
@@ -60,9 +75,6 @@ def abort(message):
 
 
 def run(command):
-    # stream = os.popen(command)
-    # return stream.read()
-
     r = subprocess.Popen(command, shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
@@ -77,38 +89,14 @@ class RunResult(object):
 
 
 class Service(object):
-    pass
 
+    name = None
 
-class Nginx(Service):
-
-    name = 'nginx'
-
-    def start(self):
-        print 'Starting nginx:',
-        r = run('nginx')
-        if r.stderr:
-            print r.stderr
-        else:
-            print 'nginx.'
-
-    def stop(self):
-        print 'Stopping nginx:',
-        r = run('nginx -s stop')
-        if r.stderr and run('launchctl list | grep nginx').stdout:
-            print r.stderr
-        else:
-            print 'nginx.'
-
-    def status(self):
-        if run('launchctl list | grep nginx').stdout:
-            print '* nginx is running'
-        else:
-            print '* nginx is not runnging'
-
-    def restart(self):
-        self.stop()
-        self.start()
+    def __init__(self):
+        if self.name is None:
+            self.name = str(self.__module__).split('.')[-1]
+            print "Warning: Service %s does not have attribute 'name'. "\
+                  "Set to '%s' as default." % (self.__class__, self.name)
 
 
 if __name__ == '__main__':
