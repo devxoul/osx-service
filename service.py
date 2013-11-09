@@ -56,7 +56,7 @@ def register_services():
             for member in inspect.getmembers(module, inspect.isclass):
                 if member[0] != 'Service':
                     service = member[1]()
-                    if validate_service(service):
+                    if service._available() and validate_service(service):
                         registered_services[service.name] = service
 
 
@@ -118,6 +118,10 @@ class Service(object):
 
             name = 'nginx'
 
+            def _available(self):
+                r = run('which nginx')
+                return not not r.stdout
+
             def start(self):
                 print 'Starting nginx:',
                 r = run('nginx')
@@ -151,6 +155,10 @@ class Service(object):
             self.name = str(self.__module__).split('.')[-1]
             print "Warning: Service %s does not have attribute 'name'. "\
                   "Set to '%s' as default." % (self.__class__, self.name)
+
+    def _available(self):
+        message = "Method not implemented on '%s': _available" % self.__class__
+        raise NotImplementedError(message)
 
 
 if __name__ == '__main__':

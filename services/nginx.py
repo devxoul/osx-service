@@ -5,6 +5,10 @@ class Nginx(Service):
 
     name = 'nginx'
 
+    def _available(self):
+        r = run('which nginx')
+        return not not r.stdout
+
     def start(self):
         print 'Starting nginx:',
         r = run('nginx')

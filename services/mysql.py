@@ -5,6 +5,10 @@ class MySQL(Service):
 
     name = 'mysqld'
 
+    def _available(self):
+        r = run('which mysqld')
+        return not not r.stdout
+
     def start(self):
         print 'Starting mysqld:',
         r = run('mysqld_safe start')
