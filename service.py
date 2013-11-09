@@ -19,7 +19,11 @@ def main():
 
     name = sys.argv[1]
     if name == 'list':
-        print '\n'.join(registered_services.keys())
+        services = registered_services.keys()
+        if services:
+            print '*', '\n* '.join(services)
+        else:
+            print 'No service registered.'
         return
 
     service = registered_services.get(name)
