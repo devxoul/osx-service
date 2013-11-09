@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+    nginx.py
+    ~~~~~~~~
+
+    A service for nginx.
+
+    :copyright: (c) 2013 by Su Yeol Jeon.
+    :license: BSD, see LICENSE.txt for more details.
+"""
+
 from service import run, Service
 
 

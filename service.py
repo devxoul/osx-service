@@ -1,4 +1,13 @@
-#! /usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+    service.py
+    ~~~~~~~~~~
+
+    A core module for osx-service.
+
+    :copyright: (c) 2013 by Su Yeol Jeon.
+    :license: BSD, see LICENSE.txt for more details.
+"""
 
 import os
 import types

@@ -1,5 +1,15 @@
 #! /bin/bash
 
+#
+#    service
+#    ~~~~~~~
+#
+#    A shell script that executes python.
+#
+#    :copyright: (c) 2013 by Su Yeol Jeon.
+#    :license: BSD, see LICENSE.txt for more details.
+#
+
 REALPATH=$(readlink /usr/local/bin/service)
 DIR=$(dirname $REALPATH)
 python $DIR/../service.py $@
