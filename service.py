@@ -30,8 +30,10 @@ def main():
         usage_service(service)
 
     command = sys.argv[2]
-
-    f = getattr(service, command)
+    try:
+        f = getattr(service, command)
+    except AttributeError:
+        abort("Command '%s' is not defined for service: %s" % (command, name))
     if not isinstance(f, types.MethodType):
         abort("Command '%s' is not defined for service: %s" % (command, name))
 
@@ -39,6 +41,8 @@ def main():
 
 
 def register_services():
+    """Registers services(instance of :class:`Service`) from
+       `services` module."""
     for filename in os.listdir('services'):
         if filename[0] != '_' and filename[-3:] == '.py':
             module_name = filename[:-3]
@@ -53,6 +57,7 @@ def register_services():
 
 
 def validate_service(service):
+    """Validates service class instance."""
     if not hasattr(service, 'name') or service.name is None:
         print "Warning: Service %s does not have attribute 'name'." \
               % service.__class__
@@ -61,6 +66,10 @@ def validate_service(service):
 
 
 def usage_service(service):
+    """Prints usage of service and aborts.
+
+    :param service: An instance of :class:`Service` to validate.
+    """
     methods = inspect.getmembers(service, inspect.ismethod)
     if methods:
         commands = [cmd for cmd in zip(*methods)[0] if cmd[0] != '_']
@@ -70,15 +79,25 @@ def usage_service(service):
 
 
 def abort(message):
+    """Aborts program with return code 1.
+
+    :param message: An aborting message.
+    """
     print message
     exit(1)
 
 
-def run(command):
+def run(command, log=False):
+    """Runs shell command and returns instance of :class:`RunResult`.
+
+    :param command: A command to be executed.
+    """
+    if log:
+        print command
     r = subprocess.Popen(command, shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    return RunResult(r.stdout.read(), r.stderr.read())
+    return RunResult(r.stdout.read()[:-1], r.stderr.read())
 
 
 class RunResult(object):
@@ -89,7 +108,38 @@ class RunResult(object):
 
 
 class Service(object):
+    """Sample implements::
 
+        class Nginx(Service):
+
+            name = 'nginx'
+
+            def start(self):
+                print 'Starting nginx:',
+                r = run('nginx')
+                if r.stderr:
+                    print r.stderr
+                else:
+                    print 'nginx.'
+
+            def stop(self):
+                print 'Stopping nginx:',
+                r = run('nginx -s stop')
+                if r.stderr and run('launchctl list | grep nginx').stdout:
+                    print r.stderr
+                else:
+                    print 'nginx.'
+
+            def restart(self):
+                self.stop()
+                self.start()
+
+            def status(self):
+                if run('launchctl list | grep nginx').stdout:
+                    print '* nginx is running'
+                else:
+                    print '* nginx is not runnging'
+    """
     name = None
 
     def __init__(self):

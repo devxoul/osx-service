@@ -21,12 +21,12 @@ class Nginx(Service):
         else:
             print 'nginx.'
 
+    def restart(self):
+        self.stop()
+        self.start()
+
     def status(self):
         if run('launchctl list | grep nginx').stdout:
             print '* nginx is running'
         else:
             print '* nginx is not runnging'
-
-    def restart(self):
-        self.stop()
-        self.start()

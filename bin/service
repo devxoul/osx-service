@@ -1,3 +1,5 @@
 #! /bin/bash
 
-python $(dirname $0)/service.py $@
+REALPATH=$(readlink /usr/local/bin/service)
+DIR=$(dirname $REALPATH)
+python $DIR/../service.py $@
