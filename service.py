@@ -28,11 +28,13 @@ def main():
 
     name = sys.argv[1]
     if name == 'list':
-        services = registered_services.keys()
-        if services:
-            print '*', '\n* '.join(services)
-        else:
+        if len(registered_services) == 0:
             print 'No service registered.'
+            return
+        services = registered_services.iteritems()
+        for service_name, service in services:
+            print '* [%s] %s' % (service._running() and 'RUNNING' or 'STOPPED',
+                                 service_name)
         return
 
     service = registered_services.get(name)

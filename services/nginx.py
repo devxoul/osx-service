@@ -20,6 +20,11 @@ class Nginx(Service):
         r = run('which nginx')
         return not not r.stdout
 
+    def _running(self):
+        if int(run('ps aux | grep nginx | wc -l').stdout) > 1:
+            return True
+        return False
+
     def start(self):
         print 'Starting nginx:',
         r = run('nginx')
@@ -31,7 +36,7 @@ class Nginx(Service):
     def stop(self):
         print 'Stopping nginx:',
         r = run('nginx -s stop')
-        if r.stderr and run('launchctl list | grep nginx').stdout:
+        if r.stderr and self._running():
             print r.stderr
         else:
             print 'nginx.'
@@ -41,7 +46,7 @@ class Nginx(Service):
         self.start()
 
     def status(self):
-        if run('launchctl list | grep nginx').stdout:
+        if self._running():
             print '* nginx is running'
         else:
             print '* nginx is not runnging'

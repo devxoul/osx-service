@@ -20,6 +20,11 @@ class MySQL(Service):
         r = run('which mysqld')
         return not not r.stdout
 
+    def _running(self):
+        if int(run('ps aux | grep mysqld | wc -l').stdout) > 1:
+            return True
+        return False
+
     def start(self):
         print 'Starting mysqld:',
         r = run('mysqld_safe start')
@@ -31,7 +36,7 @@ class MySQL(Service):
     def stop(self):
         print 'Stopping mysqld:',
         r = run('mysqld_safe stop')
-        if r.stderr and run('launchctl list | grep mysqld').stdout:
+        if r.stderr and self._running():
             print r.stderr
         else:
             print 'mysqld.'
@@ -41,7 +46,7 @@ class MySQL(Service):
         self.start()
 
     def status(self):
-        if run('launchctl list | grep mysqld').stdout:
+        if self._running():
             print '* mysqld is running'
         else:
             print '* mysqld is not runnging'
