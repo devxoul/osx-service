@@ -13,8 +13,8 @@ $ python setup.py
 
 ```
 $ service list
-* nginx
-* mysql
+* [RUNNING] nginx
+* [STOPPED] mysql
 ```
 
 ### Using a command
