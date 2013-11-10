@@ -39,4 +39,4 @@ Starting nginx: nginx.
 
 **osx-service** is writted in python. Just open any files in `/usr/local/etc/service/services/` directory and see how it looks.
 
-All services are subclass of `Service`. Methods defined in service class are used as a command. Methods that of name starts with "_"(underscore) is not used as a command.
+All services are subclass of `Service`. Methods defined in service class are used as a command. Methods that of name starts with "_"(underscore) are not used as a command.
